@@ -1,6 +1,8 @@
 #include <Arduino.h>
 
 #include <DHT.h>
+#include <WiFi.h>
+#include "Credentials.hpp"
 #include "Constants.hpp"
 #include "service/MoistureSensor.hpp"
 
@@ -16,6 +18,50 @@ DHT dht(DHT_PIN, DHT_TYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 
 int moisture_sensor_threshold = 65; 
 
+uint8_t connect_wifi() {
+  WiFi.disconnect(); 
+  WiFi.mode(WIFI_STA); 
+  Serial.print("Connecting to: ");
+  Serial.println(String(wifi_ssid));
+
+  WiFi.begin(wifi_ssid, wifi_password); 
+
+  unsigned long start = millis(); 
+  uint8_t connectionStatus; 
+  bool attemptConnection = true; 
+  while (attemptConnection) {
+    connectionStatus = WiFi.status(); 
+    unsigned long timeElapsed = millis() - start; 
+    if (connectionStatus == WL_CONNECTED || connectionStatus == WL_CONNECT_FAILED) { 
+      attemptConnection = false; 
+    }
+    if (timeElapsed > max_connection_wait_ms) { 
+      Serial.print("Timed out"); 
+      attemptConnection = false;
+    } 
+    delay(1000); 
+  }
+
+  if (connectionStatus == WL_CONNECTED) {
+    Serial.println("WiFi connected at: " + WiFi.localIP().toString());
+  } else {
+    Serial.println("WiFi connection *** FAILED ***");
+  }
+
+  return connectionStatus; 
+}
+
+void disconnect_wifi() {
+  WiFi.disconnect(); 
+  delay(500); 
+  if (WiFi.status() == WL_DISCONNECTED) {
+    Serial.println("WiFi disconnected");
+  } else {
+    Serial.println("Error disconnecting wifi");
+  }
+  WiFi.mode(WIFI_OFF); 
+}
+
 void setup() {
   Serial.begin(9600); 
   dht.begin(); 
@@ -25,6 +71,10 @@ void setup() {
       Constants::DEFAULT_MOISTURE_OUTPUT_MIN, 
       Constants::DEFAULT_MOISTURE_OUTPUT_MAX
   ); 
+
+  connect_wifi(); 
+  delay(5000); 
+  disconnect_wifi(); 
 }
 
 void loop() {
@@ -53,4 +103,10 @@ void loop() {
   Serial.println(" deg C");
 
   delay(1000); 
+}
+
+void stop() {
+  disconnect_wifi(); 
+  noInterrupts(); 
+  while(1); 
 }
