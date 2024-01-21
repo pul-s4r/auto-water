@@ -4,6 +4,8 @@
 #include <WiFi.h>
 #include <esp_wifi.h>
 #include <esp_bt.h>
+#include <MQTT.h>
+
 #include "Credentials.hpp"
 #include "Constants.hpp"
 #include "service/MoistureSensor.hpp"
@@ -18,9 +20,14 @@ using namespace AutoWater;
 MoistureSensor moistureSensor(MOISTURE_SENSOR_PIN); 
 DHT dht(DHT_PIN, DHT_TYPE); //// Initialize DHT sensor for normal 16mhz Arduino
 
+MQTTClient mqttClient; 
+WiFiClient wifiClient; 
+
 int moisture_sensor_threshold = 65; 
 uint64_t us_TO_S_FACTOR = 1000000;
 RTC_DATA_ATTR int bootCount = 0;
+
+const char * topic1 = "test1/hello"; 
 
 uint8_t connect_wifi() {
   WiFi.disconnect(); 
@@ -52,6 +59,22 @@ uint8_t connect_wifi() {
   }
 
   return connectionStatus; 
+}
+
+void connect_mqtt() {
+  Serial.print("Checking WiFi ...");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.print("\nConnecting to MQTT broker ...");
+  while (!mqttClient.connect(mqtt_client_id, mqtt_username, mqtt_password)) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.println("\nConnection successful");
 }
 
 void disconnect_wifi() {
@@ -118,6 +141,14 @@ void setup() {
 
   connect_wifi(); 
 
+  mqttClient.begin(mqtt_broker_hostname, mqtt_broker_port, wifiClient); 
+  // mqttClient.onMessage(messageReceived); 
+
+  connect_mqtt(); 
+  mqttClient.loop(); 
+
+  mqttClient.subscribe(topic1);
+
   int raw_moisture = analogRead(MOISTURE_SENSOR_PIN);
   moistureSensor.setRawValue(raw_moisture); 
   float soil_pct_moisture = moistureSensor.readValue(); 
@@ -141,6 +172,14 @@ void setup() {
   Serial.print(" %, Temp: ");
   Serial.print(temp);
   Serial.println(" deg C");
+
+  mqttClient.publish(topic1, "world"); 
+
+
+  mqttClient.unsubscribe(topic1);
+  bool disconnected = mqttClient.disconnect(); 
+  Serial.print("Disconnected from MQTT broker: ");
+  Serial.println(disconnected ? "yes" : "no");  
 
   enter_deep_sleep(60); 
 }
