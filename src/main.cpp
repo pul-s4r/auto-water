@@ -174,20 +174,17 @@ void setup() {
   Serial.print(temp);
   Serial.println(" deg C");
 
-  // Serial.println(("soilMoisture,site=" + site_name + " value=" + String(soil_pct_moisture)).c_str()); 
-  Serial.println((String(soil_pct_moisture)).c_str()); 
-
   mqttClient.publish(
     (sensor_topic + "/soilMoisture").c_str(), 
-    ("soilMoisture,site=" + site_name + " value=" + String(soil_pct_moisture)).c_str()
+    ("{\"measurement\":\"soilMoisture\", \"siteName\":\"" + site_name + "\", \"value\":" + String(soil_pct_moisture) + "}").c_str()
   ); 
   mqttClient.publish(
     (sensor_topic + "/humidity").c_str(), 
-    ("humidity,site=" + site_name + " value=" + String(hum)).c_str()
+    ("{\"measurement\":\"humidity\", \"siteName\":\"" + site_name + "\", \"value\":" + String(hum) + "}").c_str()
   ); 
   mqttClient.publish(
     (sensor_topic + "/temperature").c_str(), 
-    ("temperature,site=" + site_name + " value=" + String(temp)).c_str()
+    ("{\"measurement\":\"temperature\", \"siteName\":\"" + site_name + "\", \"value\":" + String(temp) + "}").c_str()
   ); 
 
 
