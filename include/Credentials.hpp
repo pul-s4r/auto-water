@@ -11,5 +11,6 @@ const char* mqtt_username = "";
 const char* mqtt_password = ""; 
 const char* mqtt_client_id = ""; 
 
+const char* location = ""; 
 
 #endif

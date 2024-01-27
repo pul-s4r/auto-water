@@ -27,7 +27,8 @@ int moisture_sensor_threshold = 65;
 uint64_t us_TO_S_FACTOR = 1000000;
 RTC_DATA_ATTR int bootCount = 0;
 
-const char * topic1 = "test1/hello"; 
+const String sensor_topic = "sensors"; 
+const String site_name = location; 
 
 uint8_t connect_wifi() {
   WiFi.disconnect(); 
@@ -147,7 +148,7 @@ void setup() {
   connect_mqtt(); 
   mqttClient.loop(); 
 
-  mqttClient.subscribe(topic1);
+  mqttClient.subscribe(sensor_topic);
 
   int raw_moisture = analogRead(MOISTURE_SENSOR_PIN);
   moistureSensor.setRawValue(raw_moisture); 
@@ -173,10 +174,24 @@ void setup() {
   Serial.print(temp);
   Serial.println(" deg C");
 
-  mqttClient.publish(topic1, "world"); 
+  // Serial.println(("soilMoisture,site=" + site_name + " value=" + String(soil_pct_moisture)).c_str()); 
+  Serial.println((String(soil_pct_moisture)).c_str()); 
+
+  mqttClient.publish(
+    (sensor_topic + "/soilMoisture").c_str(), 
+    ("soilMoisture,site=" + site_name + " value=" + String(soil_pct_moisture)).c_str()
+  ); 
+  mqttClient.publish(
+    (sensor_topic + "/humidity").c_str(), 
+    ("humidity,site=" + site_name + " value=" + String(hum)).c_str()
+  ); 
+  mqttClient.publish(
+    (sensor_topic + "/temperature").c_str(), 
+    ("temperature,site=" + site_name + " value=" + String(temp)).c_str()
+  ); 
 
 
-  mqttClient.unsubscribe(topic1);
+  mqttClient.unsubscribe(sensor_topic.c_str());
   bool disconnected = mqttClient.disconnect(); 
   Serial.print("Disconnected from MQTT broker: ");
   Serial.println(disconnected ? "yes" : "no");  
