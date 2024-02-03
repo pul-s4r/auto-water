@@ -126,6 +126,10 @@ void print_wakeup_reason(){
   }
 }
 
+String create_sensor_data_message(String measurement, String siteName, String value) {
+  return "{\"measurement\":\"" + measurement + "\", \"siteName\":\"" + siteName + "\", \"value\":" + value + "}"; 
+}
+
 void setup() {
   Serial.begin(9600); 
   delay(1000); 
@@ -176,15 +180,18 @@ void setup() {
 
   mqttClient.publish(
     (sensor_topic + "/soilMoisture").c_str(), 
-    ("{\"measurement\":\"soilMoisture\", \"siteName\":\"" + site_name + "\", \"value\":" + String(soil_pct_moisture) + "}").c_str()
+    // ("{\"measurement\":\"soilMoisture\", \"siteName\":\"" + site_name + "\", \"value\":" + String(soil_pct_moisture) + "}").c_str()
+    (create_sensor_data_message("soilMoisture", site_name, String(soil_pct_moisture))).c_str()
   ); 
   mqttClient.publish(
     (sensor_topic + "/humidity").c_str(), 
-    ("{\"measurement\":\"humidity\", \"siteName\":\"" + site_name + "\", \"value\":" + String(hum) + "}").c_str()
+    // ("{\"measurement\":\"humidity\", \"siteName\":\"" + site_name + "\", \"value\":" + String(hum) + "}").c_str()
+    (create_sensor_data_message("humidity", site_name, String(hum))).c_str()
   ); 
   mqttClient.publish(
     (sensor_topic + "/temperature").c_str(), 
-    ("{\"measurement\":\"temperature\", \"siteName\":\"" + site_name + "\", \"value\":" + String(temp) + "}").c_str()
+    // ("{\"measurement\":\"temperature\", \"siteName\":\"" + site_name + "\", \"value\":" + String(temp) + "}").c_str()
+    (create_sensor_data_message("temperature", site_name, String(temp))).c_str()
   ); 
 
 
