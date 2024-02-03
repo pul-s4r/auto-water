@@ -160,23 +160,17 @@ void setup() {
 
   float hum = dht.readHumidity();
   float temp = dht.readTemperature();
-  Serial.print("[RAW=");
-  Serial.print(raw_moisture);
-  Serial.print("] "); 
-  if (soil_pct_moisture > moisture_sensor_threshold) {
-    Serial.print("Soil is: WET (");
+  Serial.print("[RAW=" + String(raw_moisture) + "] "); 
+  boolean is_moisture_above_limit = soil_pct_moisture > moisture_sensor_threshold; 
+  String isWet = is_moisture_above_limit ? "WET" : "DRY"; 
+  if (is_moisture_above_limit) {
     digitalWrite(FLAG_PIN, HIGH); 
   } else { 
-    Serial.print("Soil is: DRY (");
     digitalWrite(FLAG_PIN, LOW); 
   }
-  Serial.print(soil_pct_moisture); 
-  Serial.print("), "); 
-  Serial.print("Humidity: ");
-  Serial.print(hum);
-  Serial.print(" %, Temp: ");
-  Serial.print(temp);
-  Serial.println(" deg C");
+  Serial.println("Soil is: " + isWet + " (" + String(soil_pct_moisture) + 
+    "), Humidity: " + String(hum) + "%, Temp: " + String(temp) + " deg C"
+  ); 
 
   mqttClient.publish(
     (sensor_topic + "/soilMoisture").c_str(), 
