@@ -9,6 +9,7 @@ namespace AutoWater {
         MoistureSensor(uint8_t sensorPin); 
         MoistureSensor(uint8_t sensorPin, long moistureOffset, long moistureMax, long moistureRmin, long moistureRmax); 
         void init(long moistureOffset, long moistureMax, long moistureOutMin, long moistureOutMax);
+        void init(uint8_t sensorPin, long moistureOffset, long moistureMax, long moistureOutMin, long moistureOutMax);
         int readRawValue(); 
         void setRawValue(int rawValue); 
         float readValue();

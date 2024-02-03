@@ -25,6 +25,11 @@ MoistureSensor::MoistureSensor(uint8_t sensorPin, long moistureOffset, long mois
 }
 
 void MoistureSensor::init(long moistureOffset, long moistureMax, long moistureOutMin, long moistureOutMax) {
+    this->init(this->sensorPin, moistureOffset, moistureMax, moistureOutMin, moistureOutMax); 
+}
+
+void MoistureSensor::init(uint8_t sensorPin, long moistureOffset, long moistureMax, long moistureOutMin, long moistureOutMax) {
+    this->sensorPin = sensorPin; 
     pinMode(this->sensorPin, INPUT); 
     this->moistureOffset = moistureOffset; 
     this->moistureMax = moistureMax; 
@@ -33,7 +38,9 @@ void MoistureSensor::init(long moistureOffset, long moistureMax, long moistureOu
 }
 
 int MoistureSensor::readRawValue() {
-    return analogRead(this->sensorPin); 
+    Serial.println("Sensor pin: " + String(this->sensorPin)); 
+    this->rawValue = analogRead(this->sensorPin); 
+    return this->rawValue; 
 }
 
 void MoistureSensor::setRawValue(int rawValue) {

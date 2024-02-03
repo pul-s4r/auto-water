@@ -135,6 +135,7 @@ void setup() {
   delay(1000); 
   dht.begin(); 
   moistureSensor.init(
+      MOISTURE_SENSOR_PIN, 
       Constants::DEFAULT_MOISTURE_MIN, 
       Constants::DEFAULT_MOISTURE_MAX, 
       Constants::DEFAULT_MOISTURE_OUTPUT_MIN, 
@@ -154,8 +155,7 @@ void setup() {
 
   mqttClient.subscribe(sensor_topic);
 
-  int raw_moisture = analogRead(MOISTURE_SENSOR_PIN);
-  moistureSensor.setRawValue(raw_moisture); 
+  int raw_moisture = moistureSensor.readRawValue(); 
   float soil_pct_moisture = moistureSensor.readValue(); 
 
   float hum = dht.readHumidity();
