@@ -102,7 +102,7 @@ void enter_deep_sleep(uint64_t sleepTimeInSecs) {
   delay(1000);
   Serial.flush(); 
   esp_deep_sleep_start(); 
-  Serial.println("SHould never happen"); 
+  Serial.println("Should never happen"); 
 }
 
 void increment_and_log_bootcount() {
@@ -180,17 +180,14 @@ void setup() {
 
   mqttClient.publish(
     (sensor_topic + "/soilMoisture").c_str(), 
-    // ("{\"measurement\":\"soilMoisture\", \"siteName\":\"" + site_name + "\", \"value\":" + String(soil_pct_moisture) + "}").c_str()
     (create_sensor_data_message("soilMoisture", site_name, String(soil_pct_moisture))).c_str()
   ); 
   mqttClient.publish(
     (sensor_topic + "/humidity").c_str(), 
-    // ("{\"measurement\":\"humidity\", \"siteName\":\"" + site_name + "\", \"value\":" + String(hum) + "}").c_str()
     (create_sensor_data_message("humidity", site_name, String(hum))).c_str()
   ); 
   mqttClient.publish(
     (sensor_topic + "/temperature").c_str(), 
-    // ("{\"measurement\":\"temperature\", \"siteName\":\"" + site_name + "\", \"value\":" + String(temp) + "}").c_str()
     (create_sensor_data_message("temperature", site_name, String(temp))).c_str()
   ); 
 
