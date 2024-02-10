@@ -3,7 +3,8 @@
 
 const char* wifi_ssid = ""; 
 const char* wifi_password = ""; 
-const int max_connection_wait_ms = 15000; 
+const int max_wifi_connection_wait_ms = 15000; 
+const int max_mqtt_connection_wait_ms = 15000; 
 
 const char* mqtt_broker_hostname = ""; 
 int mqtt_broker_port = 1883; 

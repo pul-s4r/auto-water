@@ -46,7 +46,7 @@ uint8_t connect_wifi() {
     if (connectionStatus == WL_CONNECTED || connectionStatus == WL_CONNECT_FAILED) { 
       attemptConnection = false; 
     }
-    if (timeElapsed > max_connection_wait_ms) { 
+    if (timeElapsed > max_wifi_connection_wait_ms) { 
       Serial.print("Timed out"); 
       attemptConnection = false;
     } 
