@@ -62,20 +62,33 @@ uint8_t connect_wifi() {
   return connectionStatus; 
 }
 
-void connect_mqtt() {
+boolean connect_mqtt() {
   Serial.print("Checking WiFi ...");
+  unsigned long start = millis(); 
   while (WiFi.status() != WL_CONNECTED) {
+    unsigned long timeElapsed = millis() - start; 
     Serial.print(".");
+    if (timeElapsed > max_wifi_connection_wait_ms) { 
+      Serial.println("\nWifi not connected"); 
+      return false; 
+    } 
     delay(500);
   }
 
   Serial.print("\nConnecting to MQTT broker ...");
+  start = millis(); 
   while (!mqttClient.connect(mqtt_client_id, mqtt_username, mqtt_password)) {
+    unsigned long timeElapsed = millis() - start; 
     Serial.print(".");
+    if (timeElapsed > max_wifi_connection_wait_ms) { 
+      Serial.println("\nTimed out connecting to MQTT broker"); 
+      return false; 
+    } 
     delay(500);
   }
 
   Serial.println("\nConnection successful");
+  return true; 
 }
 
 void disconnect_wifi() {
@@ -150,7 +163,11 @@ void setup() {
   mqttClient.begin(mqtt_broker_hostname, mqtt_broker_port, wifiClient); 
   // mqttClient.onMessage(messageReceived); 
 
-  connect_mqtt(); 
+  boolean isMqttConnected = connect_mqtt(); 
+  if (!isMqttConnected) {
+    Serial.println("Connection to broker not established, entering deep sleep"); 
+    enter_deep_sleep(60); 
+  }
   mqttClient.loop(); 
 
   mqttClient.subscribe(sensor_topic);
