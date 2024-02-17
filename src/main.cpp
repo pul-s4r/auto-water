@@ -18,7 +18,7 @@ using namespace AutoWater;
 #define DHT_TYPE DHT22   // DHT 22  (AM2302)
 
 MoistureSensor moistureSensor(MOISTURE_SENSOR_PIN); 
-DHT dht(DHT_PIN, DHT_TYPE); //// Initialize DHT sensor for normal 16mhz Arduino
+DHT dht(DHT_PIN, DHT_TYPE); // Initialize DHT sensor for normal 16mhz Arduino
 
 MQTTClient mqttClient; 
 WiFiClient wifiClient; 
@@ -63,7 +63,7 @@ uint8_t connect_wifi() {
 }
 
 boolean connect_mqtt() {
-  Serial.print("Checking WiFi ...");
+  Serial.print("Checking WiFi ");
   unsigned long start = millis(); 
   while (WiFi.status() != WL_CONNECTED) {
     unsigned long timeElapsed = millis() - start; 
@@ -75,7 +75,7 @@ boolean connect_mqtt() {
     delay(500);
   }
 
-  Serial.print("\nConnecting to MQTT broker ...");
+  Serial.print("\nConnecting to MQTT broker ");
   start = millis(); 
   while (!mqttClient.connect(mqtt_client_id, mqtt_username, mqtt_password)) {
     unsigned long timeElapsed = millis() - start; 
@@ -161,7 +161,6 @@ void setup() {
   connect_wifi(); 
 
   mqttClient.begin(mqtt_broker_hostname, mqtt_broker_port, wifiClient); 
-  // mqttClient.onMessage(messageReceived); 
 
   boolean isMqttConnected = connect_mqtt(); 
   if (!isMqttConnected) {
@@ -216,7 +215,6 @@ void loop() {
 }
 
 void stop() {
-  disconnect_wifi(); 
   noInterrupts(); 
   while(1); 
 }
