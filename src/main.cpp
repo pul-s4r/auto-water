@@ -180,11 +180,7 @@ void setup() {
   Serial.print("[RAW=" + String(raw_moisture) + "] "); 
   boolean is_moisture_above_limit = soil_pct_moisture > moisture_sensor_threshold; 
   String isWet = is_moisture_above_limit ? "WET" : "DRY"; 
-  if (is_moisture_above_limit) {
-    digitalWrite(FLAG_PIN, HIGH); 
-  } else { 
-    digitalWrite(FLAG_PIN, LOW); 
-  }
+  digitalWrite(FLAG_PIN, is_moisture_above_limit ? HIGH : LOW); 
   Serial.println("Soil is: " + isWet + " (" + String(soil_pct_moisture) + 
     "), Humidity: " + String(hum) + "%, Temp: " + String(temp) + " deg C"
   ); 
