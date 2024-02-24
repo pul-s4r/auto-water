@@ -14,6 +14,7 @@ using namespace AutoWater;
 
 #define FLAG_PIN 2
 #define MOISTURE_SENSOR_PIN 35
+#define BATTERY_PIN 27
 #define DHT_PIN 18
 #define DHT_TYPE DHT22   // DHT 22  (AM2302)
 
@@ -188,6 +189,8 @@ void setup() {
     "), Humidity: " + String(hum) + "%, Temp: " + String(temp) + " deg C"
   ); 
 
+  float batteryLevel = map(analogRead(BATTERY_PIN), 0.0f, 4095.0f, 0, 100);
+
   mqttClient.publish(
     (sensor_topic + "/soilMoisture").c_str(), 
     (create_sensor_data_message("soilMoisture", site_name, String(soil_pct_moisture))).c_str()
@@ -199,6 +202,10 @@ void setup() {
   mqttClient.publish(
     (sensor_topic + "/temperature").c_str(), 
     (create_sensor_data_message("temperature", site_name, String(temp))).c_str()
+  ); 
+  mqttClient.publish(
+    (sensor_topic + "/batteryLevel").c_str(), 
+    (create_sensor_data_message("batteryLevel", site_name, String(batteryLevel))).c_str()
   ); 
 
 
