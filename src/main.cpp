@@ -129,15 +129,19 @@ void print_wakeup_reason(){
 
   wakeup_reason = esp_sleep_get_wakeup_cause();
 
+  String wakeup_reason_printable; 
+
   switch(wakeup_reason)
   {
-    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
-    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
-    case ESP_SLEEP_WAKEUP_TIMER : Serial.println("Wakeup caused by timer"); break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println("Wakeup caused by touchpad"); break;
-    case ESP_SLEEP_WAKEUP_ULP : Serial.println("Wakeup caused by ULP program"); break;
-    default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
+    case ESP_SLEEP_WAKEUP_EXT0 : wakeup_reason_printable = "external signal from RTC_IO"; break;
+    case ESP_SLEEP_WAKEUP_EXT1 : wakeup_reason_printable = "external signal from RTC_CNTL"; break;
+    case ESP_SLEEP_WAKEUP_TIMER : wakeup_reason_printable = "timer"; break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD : wakeup_reason_printable = "touchpad"; break;
+    case ESP_SLEEP_WAKEUP_ULP : wakeup_reason_printable = "ULP program"; break;
+    default : wakeup_reason_printable = "other - " + wakeup_reason; break;
   }
+
+  Serial.println("Wakeup caused by: " + wakeup_reason_printable); 
 }
 
 String create_sensor_data_message(String measurement, String siteName, String value) {
