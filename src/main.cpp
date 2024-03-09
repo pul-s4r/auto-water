@@ -148,6 +148,13 @@ String create_sensor_data_message(String measurement, String siteName, String va
   return "{\"measurement\":\"" + measurement + "\", \"siteName\":\"" + siteName + "\", \"value\":" + value + "}"; 
 }
 
+void publish_mqtt_message(String topic, float value) {
+  mqttClient.publish(
+    (sensor_topic + "/" + topic).c_str(), 
+    (create_sensor_data_message(topic, site_name, String(value))).c_str()
+  ); 
+}
+
 void setup() {
   Serial.begin(9600); 
   delay(1000); 
@@ -191,23 +198,10 @@ void setup() {
 
   float batteryLevel = map(analogRead(BATTERY_PIN), 0.0f, 4095.0f, 0, 100);
 
-  mqttClient.publish(
-    (sensor_topic + "/soilMoisture").c_str(), 
-    (create_sensor_data_message("soilMoisture", site_name, String(soil_pct_moisture))).c_str()
-  ); 
-  mqttClient.publish(
-    (sensor_topic + "/humidity").c_str(), 
-    (create_sensor_data_message("humidity", site_name, String(hum))).c_str()
-  ); 
-  mqttClient.publish(
-    (sensor_topic + "/temperature").c_str(), 
-    (create_sensor_data_message("temperature", site_name, String(temp))).c_str()
-  ); 
-  mqttClient.publish(
-    (sensor_topic + "/batteryLevel").c_str(), 
-    (create_sensor_data_message("batteryLevel", site_name, String(batteryLevel))).c_str()
-  ); 
-
+  publish_mqtt_message("soilMoisture", soil_pct_moisture); 
+  publish_mqtt_message("humidity", hum); 
+  publish_mqtt_message("temperature", temp); 
+  publish_mqtt_message("batteryLevel", batteryLevel); 
 
   mqttClient.unsubscribe(sensor_topic.c_str());
   bool disconnected = mqttClient.disconnect(); 
