@@ -14,7 +14,7 @@ using namespace AutoWater;
 
 #define FLAG_PIN 2
 #define MOISTURE_SENSOR_PIN 35
-#define BATTERY_PIN 27
+#define BATTERY_PIN 33
 #define DHT_PIN 18
 #define DHT_TYPE DHT22   // DHT 22  (AM2302)
 
