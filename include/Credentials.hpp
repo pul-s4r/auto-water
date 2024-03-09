@@ -14,4 +14,7 @@ const char* mqtt_client_id = "";
 
 const char* location = ""; 
 
+const char* ntp_server = "pool.ntp.org";
+const char* tz_info = "EST-10EDT-11,M10.5.0/02:00:00,M3.5.0/03:00:00";
+
 #endif
