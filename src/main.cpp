@@ -5,6 +5,7 @@
 #include <esp_wifi.h>
 #include <esp_bt.h>
 #include <MQTT.h>
+#include <time.h>
 
 #include "Credentials.hpp"
 #include "Constants.hpp"
@@ -30,6 +31,9 @@ RTC_DATA_ATTR int bootCount = 0;
 
 const String sensor_topic = "sensors"; 
 const String site_name = location; 
+
+tm timeinfo;
+time_t now;
 
 uint8_t connect_wifi() {
   WiFi.disconnect(); 
@@ -155,6 +159,37 @@ void publish_mqtt_message(String topic, float value) {
   ); 
 }
 
+bool getNTPtime(int sec) {
+  {
+    uint32_t start = millis();
+    do {
+      time(&now);
+      localtime_r(&now, &timeinfo);
+      Serial.print(".");
+      delay(10);
+    } while (((millis() - start) <= (1000 * sec)) && (timeinfo.tm_year < (2016 - 1900)));
+    if (timeinfo.tm_year <= (2016 - 1900)) return false;  // the NTP call was not successful
+    Serial.print("now ");  Serial.println(now);
+    char time_output[30];
+    strftime(time_output, 30, "%a  %d-%m-%y %T", localtime(&now));
+    Serial.println(time_output);
+    Serial.println();
+  }
+  return true;
+}
+
+String localtime_to_str(tm lt) {
+  char time_output[30];
+  strftime(time_output, 30, "%Y-%m-%dT%T", localtime(&now));
+  return String(time_output);
+}
+
+String localtime_to_day_of_week(tm lt) {
+  char time_output[4]; 
+  strftime(time_output, 4, "%a", localtime(&now)); 
+  return String(time_output); 
+}
+
 void setup() {
   Serial.begin(9600); 
   delay(1000); 
@@ -171,6 +206,18 @@ void setup() {
   print_wakeup_reason(); 
 
   connect_wifi(); 
+
+  // setup time
+  configTime(0, 0, ntp_server);
+  setenv("TZ", tz_info, 1); 
+
+  if (getNTPtime(10)) {
+  } else {
+    Serial.println("Time not set");
+    ESP.restart();
+  }
+
+  Serial.println("Time now: " + localtime_to_str(timeinfo) + " (" + localtime_to_day_of_week(timeinfo) + ")"); 
 
   mqttClient.begin(mqtt_broker_hostname, mqtt_broker_port, wifiClient); 
 
