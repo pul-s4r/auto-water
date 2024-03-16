@@ -25,7 +25,8 @@ DHT dht(DHT_PIN, DHT_TYPE); // Initialize DHT sensor for normal 16mhz Arduino
 MQTTClient mqttClient; 
 WiFiClient wifiClient; 
 
-int moisture_sensor_threshold = 65; 
+int moisture_limit_1 = 40; 
+int moisture_limit_2 = 60; 
 uint64_t us_TO_S_FACTOR = 1000000;
 RTC_DATA_ATTR int bootCount = 0;
 
@@ -33,7 +34,10 @@ const String sensor_topic = "sensors";
 const String site_name = location; 
 
 tm timeinfo;
+tm last_watered_time; 
 time_t now;
+
+int watering_hour = 17; 
 
 uint8_t connect_wifi() {
   WiFi.disconnect(); 
@@ -178,6 +182,11 @@ bool getNTPtime(int sec) {
   return true;
 }
 
+void set_last_watered_time() {
+  time(&now);
+  localtime_r(&now, &last_watered_time);
+}
+
 String localtime_to_str(tm lt) {
   char time_output[30];
   strftime(time_output, 30, "%Y-%m-%dT%T", localtime(&now));
@@ -236,12 +245,20 @@ void setup() {
   float hum = dht.readHumidity();
   float temp = dht.readTemperature();
   Serial.print("[RAW=" + String(raw_moisture) + "] "); 
-  boolean is_moisture_above_limit = soil_pct_moisture > moisture_sensor_threshold; 
-  String isWet = is_moisture_above_limit ? "WET" : "DRY"; 
-  digitalWrite(FLAG_PIN, is_moisture_above_limit ? HIGH : LOW); 
+  boolean is_moisture_below_limit = soil_pct_moisture < moisture_limit_1; 
+  boolean is_moisture_below_daily_limit = soil_pct_moisture < moisture_limit_2; 
+  String isWet = is_moisture_below_limit ? "DRY" : "WET"; 
   Serial.println("Soil is: " + isWet + " (" + String(soil_pct_moisture) + 
     "), Humidity: " + String(hum) + "%, Temp: " + String(temp) + " deg C"
   ); 
+
+  if (is_moisture_below_limit) {
+    set_last_watered_time(); 
+  } else if (is_moisture_below_daily_limit 
+      && last_watered_time.tm_mday != timeinfo.tm_mday
+      && last_watered_time.tm_hour >= watering_hour) {
+    set_last_watered_time(); 
+  }
 
   float batteryLevel = map(analogRead(BATTERY_PIN), 0.0f, 4095.0f, 0, 100);
 
