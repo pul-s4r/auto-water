@@ -16,6 +16,7 @@ using namespace AutoWater;
 #define FLAG_PIN 2
 #define MOISTURE_SENSOR_PIN 35
 #define BATTERY_PIN 33
+#define PUMP_PIN 32
 #define DHT_PIN 18
 #define DHT_TYPE DHT22   // DHT 22  (AM2302)
 
@@ -199,6 +200,23 @@ String localtime_to_day_of_week(tm lt) {
   return String(time_output); 
 }
 
+void operate_pump(int duration_sec) {
+  int duration_ms = duration_sec * 1000;
+  digitalWrite(PUMP_PIN, HIGH); 
+  delay(duration_ms); 
+  digitalWrite(PUMP_PIN, LOW); 
+}
+
+int calculate_operation_time(float current, float desired, int max = 10) {
+  double K = 1; 
+  int u = (int) std::round(K * (desired - current)); 
+  if (u <= 1) {
+    u = 0; 
+  }
+  u = std::min(u, max); 
+  return u; 
+}
+
 void setup() {
   Serial.begin(9600); 
   delay(1000); 
@@ -253,11 +271,19 @@ void setup() {
   ); 
 
   if (is_moisture_below_limit) {
+    int pump_duration_s = calculate_operation_time(soil_pct_moisture, moisture_limit_1); 
+    Serial.println("Operating pump for: " + String(pump_duration_s) + "s to reach instantaneous threshold"); 
+    operate_pump(pump_duration_s); 
     set_last_watered_time(); 
   } else if (is_moisture_below_daily_limit 
       && last_watered_time.tm_mday != timeinfo.tm_mday
       && last_watered_time.tm_hour >= watering_hour) {
+    int pump_duration_s = calculate_operation_time(soil_pct_moisture, moisture_limit_2); 
+    Serial.println("Operating pump for: " + String(pump_duration_s) + "s to reach daily threshold"); 
+    operate_pump(pump_duration_s); 
     set_last_watered_time(); 
+  } else {
+    Serial.println("Moisture is normal"); 
   }
 
   float batteryLevel = map(analogRead(BATTERY_PIN), 0.0f, 4095.0f, 0, 100);
